@@ -82,8 +82,8 @@ const auth = async (req, res, next) => {
                         var err = new Error('Not Authenticated!')
                         // Set status code to '401 Unauthorized' and 'WWW-Authenticate' header to 'Basic'
                         res.status(403)
-                        res.send("The userid is wrong in the parameter")
-                        logger.customlogger.error('The user id is wrong in the parameter')
+                        res.send("The userid or Basic Auth is wrong in the parameter")
+                        logger.customlogger.error('The userid or Basic Auth is wrong in the parameter')
                         next(err)
                     }                          
                 }

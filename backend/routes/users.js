@@ -11,7 +11,7 @@ const router = express.Router();
 router.get("/user/:userId", checkAuth, GetAllUsers);
 
 //POST
-router.post("/user/", PostAllUsers);
+router.post("/user", PostAllUsers);
 
 //INSERT
 router.put("/user/:userId", checkAuth, PutAllUsers);

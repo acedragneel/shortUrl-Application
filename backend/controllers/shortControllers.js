@@ -137,6 +137,7 @@ const redirectUrl = async (req,res) => {
 const historyUrl = async (req,res) => { 
     const response = req.body;
     const email = req.body.email;
+    var userid = req.params.userId;
 
     let emailError = validateEmail(email);
 
@@ -148,7 +149,7 @@ const historyUrl = async (req,res) => {
 
             const userFound = await User.findOne({
                 attributes: {exclude: ['password']},
-                where: { username: email },
+                where: { id: userid },
             }).catch((err) => {
                 if(err){
                     console.log(err);
@@ -161,18 +162,25 @@ const historyUrl = async (req,res) => {
                 logger.customlogger.error('The userid does not exists')
         
             }else{
-        
-                const urlLoaded = await ShortUrl.findAll({
-                    where: { owner_user_id: userFound.id },
-                }).catch((err) => {
-                    if(err){
-                        console.log(err);
-                        logger.customlogger.error('DB Error: URL is not found')    
-                    }
-                });    
-        
-                res.send(urlLoaded);
-                logger.customlogger.info("History is Loaded")
+
+                if(email == userFound.username){
+
+                    const urlLoaded = await ShortUrl.findAll({
+                        where: { owner_user_id: userFound.id },
+                    }).catch((err) => {
+                        if(err){
+                            console.log(err);
+                            logger.customlogger.error('DB Error: URL is not found')    
+                        }
+                    });    
+            
+                    res.send(urlLoaded);
+                    logger.customlogger.info("History is Loaded")
+
+                }else{
+                    res.status(400).send("Wrong email in Response");
+                    logger.customlogger.error("Wrong email in Response")
+                }
         
             }
 
