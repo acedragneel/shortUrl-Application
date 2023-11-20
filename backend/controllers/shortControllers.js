@@ -3,7 +3,7 @@ const logger = require('../logger/logger')
 
 const {ShortUrl,User} = require('../models')
 
-const {validateUrl,validateTier,checkResponseForShortUrl} = require('../validation/validation');
+const {validateUrl,validateTier,checkResponseForShortUrl,checkResponseForHistory,validateEmail} = require('../validation/validation');
 
 const urlShort = async (req,res) => { 
     const response = req.body;
@@ -130,22 +130,70 @@ const redirectUrl = async (req,res) => {
 
     }else{
         res.redirect(urlFound.url);
+        logger.customlogger.info("Url is Loaded")
     }
 };
 
-// app.get('/:shortUrl', async (req, res) => {
-//     const shortUrl = req.params.shortUrl;
-//     const url = await URL.findOne({ shortUrl });
+const historyUrl = async (req,res) => { 
+    const response = req.body;
+    const email = req.body.email;
 
-//     if (url) {
-//         res.redirect(url.longUrl);
-//     } else {
-//         res.status(404).json({ error: 'URL not found' });
-//     }
-// });
-  
+    let emailError = validateEmail(email);
+
+    let responseErr = checkResponseForHistory(response);
+
+    if(responseErr){
+
+        if(emailError){
+
+            const userFound = await User.findOne({
+                attributes: {exclude: ['password']},
+                where: { username: email },
+            }).catch((err) => {
+                if(err){
+                    console.log(err);
+                    logger.customlogger.error('DB Error: User is not found during the get of User')    
+                }
+            });
+        
+            if(userFound == null ){
+                res.status(400).send("The userid doesn't exists")
+                logger.customlogger.error('The userid does not exists')
+        
+            }else{
+        
+                const urlLoaded = await ShortUrl.findAll({
+                    where: { owner_user_id: userFound.id },
+                }).catch((err) => {
+                    if(err){
+                        console.log(err);
+                        logger.customlogger.error('DB Error: URL is not found')    
+                    }
+                });    
+        
+                res.send(urlLoaded);
+                logger.customlogger.info("History is Loaded")
+        
+            }
+
+
+
+        }else{
+            res.status(400).send("Invalid email");
+            logger.customlogger.error("Invalid email")
+        }
+
+    }else{
+        res.status(400).send("UnIntend Key or No key is being sent ");
+        logger.customlogger.error("UnIntend Key or No key is being sent")
+    }
+
+    
+   
+};
 
 module.exports = {
     urlShort,
-    redirectUrl
+    redirectUrl,
+    historyUrl
 };

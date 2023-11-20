@@ -80,6 +80,18 @@ const checkResponseForShortUrl =  (response) =>{
 
 }
 
+const checkResponseForHistory = (response) => {
+    const knownKeys = ['email'];
+    let isValid = true;
+
+    Object.keys(response).forEach(key => {
+        if (!knownKeys.includes(key)) {
+            isValid = false;
+        }
+    });
+
+    return isValid;
+}
 
 
 const axios = require('axios');
@@ -115,5 +127,6 @@ module.exports = {
     checkResponseForPost,
     validateUrl,
     checkResponseForShortUrl,
+    checkResponseForHistory,
     validateTier
 };
